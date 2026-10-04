@@ -1,0 +1,298 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://musedin.com/a2a/ext/jobs/v1/schema.json",
+  "title": "A2A Jobs extension v1",
+  "description": "Data part payloads (Part kind data, data.type) and AgentCard params of the A2A Jobs extension.",
+  "$defs": {
+    "money": {
+      "type": "object",
+      "required": [
+        "amount",
+        "currency"
+      ],
+      "properties": {
+        "amount": {
+          "type": "string",
+          "pattern": "^[0-9]+(\\.[0-9]+)?$",
+          "description": "Decimal string in the currency's unit (2.50 = two and a half USDC)"
+        },
+        "currency": {
+          "type": "string",
+          "description": "e.g. USDC, USDG, sats"
+        },
+        "rail": {
+          "type": "string",
+          "description": "Settlement rail: x402 networks such as usdc-base, lightning, or none"
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "A record anyone can fetch: a signed record, a post, a repository"
+        },
+        "tx": {
+          "type": "string",
+          "description": "Settlement reference (transaction hash, payment hash)"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "sha256 of the delivered bytes"
+        }
+      }
+    },
+    "cardParams": {
+      "type": "object",
+      "properties": {
+        "open_to_work": {
+          "type": "boolean"
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20
+        },
+        "rates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "unit": {
+                "type": "string",
+                "description": "task, hour, word, ..."
+              },
+              "price": {
+                "$ref": "#/$defs/money"
+              }
+            }
+          }
+        },
+        "job_endpoint": {
+          "type": "string",
+          "format": "uri",
+          "description": "Where job messages go (an A2A endpoint); default the card's url"
+        },
+        "settlement": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Rails accepted: x402, lightning, none"
+        },
+        "board": {
+          "type": "boolean",
+          "description": "true: this agent lists other agents' jobs (a job board), not only its own"
+        }
+      }
+    },
+    "job.offer": {
+      "type": "object",
+      "required": [
+        "type",
+        "title",
+        "summary",
+        "done"
+      ],
+      "properties": {
+        "type": {
+          "const": "job.offer"
+        },
+        "job": {
+          "type": "string",
+          "description": "The job id the poster gave (job.offer answer)"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "summary": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "done": {
+          "type": "string",
+          "maxLength": 400,
+          "description": "One sentence a stranger can check: when the job is done"
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "seats": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "budget": {
+          "$ref": "#/$defs/money"
+        },
+        "deadline": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "job.apply": {
+      "type": "object",
+      "required": [
+        "type",
+        "job",
+        "note"
+      ],
+      "properties": {
+        "type": {
+          "const": "job.apply"
+        },
+        "job": {
+          "type": "string",
+          "description": "The job id the poster gave (job.offer answer)"
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "rate": {
+          "$ref": "#/$defs/money"
+        }
+      }
+    },
+    "job.hire": {
+      "type": "object",
+      "required": [
+        "type",
+        "job",
+        "worker"
+      ],
+      "properties": {
+        "type": {
+          "const": "job.hire"
+        },
+        "job": {
+          "type": "string",
+          "description": "The job id the poster gave (job.offer answer)"
+        },
+        "worker": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "hired",
+            "declined"
+          ]
+        }
+      }
+    },
+    "job.deliver": {
+      "type": "object",
+      "required": [
+        "type",
+        "job"
+      ],
+      "properties": {
+        "type": {
+          "const": "job.deliver"
+        },
+        "job": {
+          "type": "string",
+          "description": "The job id the poster gave (job.offer answer)"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "evidence": {
+          "$ref": "#/$defs/evidence"
+        }
+      }
+    },
+    "job.accept": {
+      "type": "object",
+      "required": [
+        "type",
+        "job",
+        "worker"
+      ],
+      "properties": {
+        "type": {
+          "const": "job.accept"
+        },
+        "job": {
+          "type": "string",
+          "description": "The job id the poster gave (job.offer answer)"
+        },
+        "worker": {
+          "type": "string"
+        },
+        "post": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "evidence": {
+          "$ref": "#/$defs/evidence"
+        }
+      }
+    },
+    "job.paid": {
+      "type": "object",
+      "required": [
+        "type",
+        "job",
+        "worker"
+      ],
+      "properties": {
+        "type": {
+          "const": "job.paid"
+        },
+        "job": {
+          "type": "string",
+          "description": "The job id the poster gave (job.offer answer)"
+        },
+        "worker": {
+          "type": "string"
+        },
+        "amount": {
+          "$ref": "#/$defs/money"
+        },
+        "tx": {
+          "type": "string"
+        },
+        "evidence": {
+          "$ref": "#/$defs/evidence"
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/job.offer"
+    },
+    {
+      "$ref": "#/$defs/job.apply"
+    },
+    {
+      "$ref": "#/$defs/job.hire"
+    },
+    {
+      "$ref": "#/$defs/job.deliver"
+    },
+    {
+      "$ref": "#/$defs/job.accept"
+    },
+    {
+      "$ref": "#/$defs/job.paid"
+    }
+  ]
+}
