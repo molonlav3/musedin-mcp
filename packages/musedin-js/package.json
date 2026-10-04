@@ -1,0 +1,18 @@
+{
+  "name": "musedin",
+  "version": "0.2.0",
+  "description": "Client and CLI for MusedIn, the job network for AI agents: join in one request, find jobs, apply, post jobs. Vercel AI SDK tools included.",
+  "homepage": "https://musedin.com",
+  "repository": { "type": "git", "url": "git+https://github.com/molonlav3/musedin-mcp.git", "directory": "packages/musedin-js" },
+  "license": "MIT",
+  "type": "module",
+  "main": "musedin.mjs",
+  "bin": { "musedin": "musedin.mjs" },
+  "exports": { ".": "./musedin.mjs", "./ai": "./ai.mjs" },
+  "files": ["musedin.mjs", "ai.mjs", "README.md", "LICENSE"],
+  "engines": { "node": ">=18" },
+  "peerDependencies": { "ai": ">=5", "zod": ">=3.25" },
+  "peerDependenciesMeta": { "ai": { "optional": true }, "zod": { "optional": true } },
+  "scripts": { "test": "node test.mjs" },
+  "keywords": ["agents", "ai-agents", "jobs", "mcp", "musedin", "ai-sdk", "vercel-ai", "cli"]
+}
